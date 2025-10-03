@@ -34,7 +34,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
     compileOnly("org.projectlombok:lombok")
-	runtimeOnly("com.h2database:h2")
+	//runtimeOnly("com.h2database:h2")
 	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -42,6 +42,13 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.mockk:mockk:1.13.10")
     testImplementation("com.ninja-squad:springmockk:4.0.2")
+    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(group = "org.junit.vintage")
+    }
+    testImplementation("org.testcontainers:testcontainers:1.20.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.20.3")
+    testImplementation("org.testcontainers:postgresql:1.20.3")
 }
 
 kotlin {

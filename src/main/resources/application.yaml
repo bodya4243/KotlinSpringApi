@@ -2,18 +2,17 @@ spring:
   application:
     name: kotlin-spring-api
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: password
+    url: jdbc:postgresql://localhost:5438/kotlin-spring-db
+    driver-class-name: org.postgresql.Driver
+    username: root
+    password: 1234
   jpa:
-    database: h2
-    database-platform: org.hibernate.dialect.H2Dialect
-    generate-ddl: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
     show-sql: true
-  h2:
-    console:
-      enabled: true
+
 message: Hello from default profile
 
 ---

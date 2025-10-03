@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
@@ -15,7 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
 
-    private val logger = mu.KotlinLogging.logger {}  // простий logger
+    private val logger = mu.KotlinLogging.logger {}
 
     override fun handleMethodArgumentNotValid(
         ex: MethodArgumentNotValidException,
@@ -34,10 +35,21 @@ class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
             .body(exceptions)
     }
 
-    fun handleAllExceptions(ex: Exception, request: WebRequest): ResponseEntity<Any?>? {
-        logger.error { "Exception: ${ex.message}" }
+    @ExceptionHandler(InstructorNotValidException::class)
+    fun handleInputRequestError(ex: InstructorNotValidException, request: WebRequest): ResponseEntity<Any> {
+        logger.info("Exception occurred: ${ex.message} on request: $request")
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(
+                ex.message
+            )
+    }
 
+    @ExceptionHandler(java.lang.Exception::class)
+    fun handleAllExceptions(ex: java.lang.Exception, request: WebRequest): ResponseEntity<Any> {
+        logger.info("Exception occurred: ${ex.message} on request: $request")
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(ex.message)
+            .body(
+                ex.message
+            )
     }
 }

@@ -2,14 +2,20 @@ package com.example.kotlinspringapi.service
 
 import com.example.kotlinspringapi.dto.CourseDto
 import com.example.kotlinspringapi.exception.CourseNotFoundException
+import com.example.kotlinspringapi.exception.InstructorNotValidException
 import com.example.kotlinspringapi.model.Course
 import com.example.kotlinspringapi.repository.CourseRepository
 import org.springframework.stereotype.Service
 
 @Service
-class CourseServiceImpl(val courseRepository: CourseRepository) : CourseService{
-    override fun retrieveCourse(): List<CourseDto> {
-        return courseRepository.findAll()
+class CourseServiceImpl(val courseRepository: CourseRepository, val instructorService: InstructorServiceImpl) : CourseService{
+    override fun retrieveAllCourses(courseName: String?): List<CourseDto> {
+
+        val courses = courseName?.let {
+            courseRepository.findByNameContaining(it)
+        } ?: courseRepository.findAll()
+
+        return courses
             .map {
                 course -> (
                     CourseDto(
@@ -21,6 +27,12 @@ class CourseServiceImpl(val courseRepository: CourseRepository) : CourseService{
     }
 
     override fun addCourse(course: CourseDto): CourseDto {
+        val instructor = instructorService.findInstructorById(course.instructorId!!)
+
+        if(!instructor.isPresent){
+            throw InstructorNotValidException("Instructor Id is not Valid!")
+        }
+
         val courseEntity = course.let {
             Course(null, it.name, it.category)
         }
@@ -39,7 +51,7 @@ class CourseServiceImpl(val courseRepository: CourseRepository) : CourseService{
                it.name = courseDto.name
                it.category = courseDto.category
                courseRepository.save(it)
-               CourseDto(it.id, it.name, it.category)
+               CourseDto(it.id, it.name, it.category, )
            }
         } else {
             throw CourseNotFoundException("course not found by id: ${courseDto.id}")
