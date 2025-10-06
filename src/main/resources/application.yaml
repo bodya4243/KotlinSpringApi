@@ -19,5 +19,14 @@ message: Hello from default profile
 spring:
   config:
     activate:
-      on-profile: prod
-message: Hello from prod profile
+      on-profile: dev
+  datasource:
+    url: jdbc:mariadb://localhost:3308/kotlin_spring_db
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: root
+    password: 1234
+  jpa:
+    database: MYSQL
+    database-platform: org.hibernate.dialect.MariaDBDialect
+
+message: Hello from dev profile
