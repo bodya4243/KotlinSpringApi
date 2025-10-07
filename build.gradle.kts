@@ -37,10 +37,6 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.2.0")
 
-    val mapstructVersion = "1.5.5.Final"
-    implementation("org.mapstruct:mapstruct:$mapstructVersion")
-    kapt("org.mapstruct:mapstruct-processor:$mapstructVersion")
-
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     runtimeOnly("org.postgresql:postgresql")
