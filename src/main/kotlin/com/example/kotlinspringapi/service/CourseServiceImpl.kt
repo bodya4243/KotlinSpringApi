@@ -1,18 +1,18 @@
 package com.example.kotlinspringapi.service
 
-import com.example.kotlinspringapi.converter.EntityToDtoConverter
 import com.example.kotlinspringapi.dto.CourseDto
 import com.example.kotlinspringapi.exception.CourseNotFoundException
 import com.example.kotlinspringapi.exception.InstructorNotValidException
 import com.example.kotlinspringapi.model.Course
 import com.example.kotlinspringapi.repository.CourseRepository
-import org.springframework.core.convert.TypeDescriptor
+import org.springframework.core.convert.ConversionService
 import org.springframework.stereotype.Service
 
 @Service
 class CourseServiceImpl(
     val courseRepository: CourseRepository,
     val instructorService: InstructorServiceImpl,
+    val converter: ConversionService
 ) : CourseService {
     override fun retrieveAllCourses(courseName: String?): List<CourseDto> {
 
@@ -20,34 +20,31 @@ class CourseServiceImpl(
             courseRepository.findByNameContaining(it)
         } ?: courseRepository.findAll()
 
-        return courses.map { course -> toCourseDto(course) }
+        return courses.mapNotNull {
+            course -> converter.convert(course, CourseDto::class.java)
+        }
     }
 
-    override fun addCourse(course: CourseDto): CourseDto {
-        val instructor = instructorService.findInstructorById(course.instructorId!!)
+    override fun addCourse(courseDto: CourseDto): CourseDto {
+        val instructor = instructorService.findInstructorById(courseDto.instructorId!!)
 
         if (!instructor.isPresent) {
             throw InstructorNotValidException("Instructor Id is not Valid!")
         }
 
-        val courseEntity = course.let {
-            Course(null, it.name, it.category, instructor.get())
-        }
+        val courseEntity = converter.convert(courseDto, Course::class.java)!!
+
         courseRepository.save(courseEntity)
 
-        return toCourseDto(courseEntity)
+        return converter.convert(courseEntity, CourseDto::class.java)!!
     }
 
     override fun updateCourse(courseDto: CourseDto): CourseDto {
         val courseEntity = courseRepository.findById(courseDto.id!!.toLong())
 
         return if (courseEntity.isPresent) {
-            courseEntity.get().let {
-                it.name = courseDto.name
-                it.category = courseDto.category
-                courseRepository.save(it)
-                toCourseDto(it)
-            }
+            val entityToSave = converter.convert(courseDto, Course::class.java)!!
+            converter.convert(courseRepository.save(entityToSave), CourseDto::class.java)!!
         } else {
             throw CourseNotFoundException("course not found by id: ${courseDto.id}")
         }
@@ -60,18 +57,10 @@ class CourseServiceImpl(
         return if (courseEntity.isPresent) {
             courseEntity.get().let {
                 courseRepository.deleteById(it.id!!.toLong())
-                toCourseDto(it)
+                converter.convert(it, CourseDto::class.java)!!
             }
         } else {
             throw CourseNotFoundException("course not found by id: $id")
         }
-    }
-
-    private fun toCourseDto(course: Course) : CourseDto {
-        return EntityToDtoConverter.convert(
-            course,
-            TypeDescriptor.valueOf(Course::class.java),
-            TypeDescriptor.valueOf(CourseDto::class.java)
-        ) as CourseDto
     }
 }
