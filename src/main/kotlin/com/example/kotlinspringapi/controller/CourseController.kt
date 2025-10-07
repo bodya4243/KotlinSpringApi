@@ -14,29 +14,43 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.tags.Tag
 
 @RestController
 @RequestMapping("api/courses")
+@Tag(name = "Courses", description = "API для роботи з курсами")
 class CourseController(val courseService: CourseService) {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Додати новий курс", description = "Створює новий курс та повертає його")
     fun addCourse(@Valid @RequestBody courseDto: CourseDto) : CourseDto {
         return courseService.addCourse(courseDto)
     }
 
     @GetMapping
-    fun getCourses(@RequestParam("course_name") courseName: String?): List<CourseDto> {
+    @Operation(summary = "Отримати всі курси", description = "Повертає список курсів, можна фільтрувати за назвою")
+    fun getCourses(
+        @Parameter(description = "Назва курсу для фільтрації", required = false)
+        @RequestParam("course_name") courseName: String?
+    ): List<CourseDto> {
         return courseService.retrieveAllCourses(courseName)
     }
 
     @PutMapping
-    fun updateCourse(@RequestBody courseDto: CourseDto) : CourseDto {
+    @Operation(summary = "Оновити курс", description = "Оновлює існуючий курс за ID")
+    fun updateCourse(@Valid @RequestBody courseDto: CourseDto) : CourseDto {
         return courseService.updateCourse(courseDto)
     }
 
     @DeleteMapping("/{id}")
-    fun deleteCourse(@PathVariable("id") id: Int): CourseDto {
+    @Operation(summary = "Видалити курс", description = "Видаляє курс за ID та повертає видалений об'єкт")
+    fun deleteCourse(
+        @Parameter(description = "ID курсу для видалення")
+        @PathVariable("id") id: Int
+    ): CourseDto {
         return courseService.deleteCourse(id)
     }
 }

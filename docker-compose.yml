@@ -2,29 +2,15 @@ version: '3.9'
 
 services:
   db:
-    image: postgres:16
-    container_name: kotlin_postgres_db
+    image: mariadb:11
+    container_name: kotlin_mariadb
     environment:
-      POSTGRES_DB: kotlin-spring-db
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: 1234
+      MARIADB_DATABASE: kotlin_spring_db
+      MARIADB_ROOT_PASSWORD: 1234
     ports:
-      - "5438:5432"
+      - "3308:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-#  app:
-#    build: .
-#    container_name: kotlin_spring_app
-#    depends_on:
-#      - db
-#    environment:
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/kotlin-spring-db
-#      SPRING_DATASOURCE_USERNAME: root
-#      SPRING_DATASOURCE_PASSWORD: 1234
-#      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-#    ports:
-#      - "8080:8080"
+      - mariadb_data:/var/lib/mysql
 
 volumes:
-  postgres_data:
+  mariadb_data:
